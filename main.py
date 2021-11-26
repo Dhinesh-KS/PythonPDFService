@@ -19,14 +19,25 @@ def mergePDF(bytes):
     merger.write("document-output.pdf")
 
 
-async def main():
+# HTML to PDF
+async def htmlToPdf(name):
     browser = await launch(headless=True, executablePath=chromiumPath)
     page = await browser.newPage()
     await page.setViewport(viewPort)
     await page.goto(url)  # can take urlconfig as second arg
-    doc = await page.pdf(pdfConfig)
+    doc = await page.pdf(
+        {'path': name, 'width': 1900, 'height': 1200, 'margin': {'top': 50, 'left': 50, 'right': 50, 'bottom': 50}})
     mergePDF(doc)
     await browser.close()
+
+
+async def main():
+    tasks = []
+    print("Process Started")
+    for x in range(5):
+        tasks.append(asyncio.create_task(htmlToPdf(f"test{x}.pdf")))
+    L = await asyncio.gather(*tasks)
+    print("Process Completed")
 
 
 asyncio.get_event_loop().run_until_complete(main())
